@@ -1,18 +1,32 @@
+import C from './constants'
+import React from 'react'
+import { render } from 'react-dom'
+import routes from './routes'
+import sampleData from './initialState'
 import storeFactory from './store'
-import expect from 'expect'
-import { 
-	suggestResortNames
- } from './store/actions'
+import { Provider } from 'react-redux'
+import { addError } from './actions'
 
-const initalState = (localStorage['redux-store']) ?
-						JSON.parse(localStorage['redux-store']) :
-						{}
+const initialState = (localStorage["redux-store"]) ?
+    JSON.parse(localStorage["redux-store"]) :
+    sampleData
 
-const saveState = () => {
-	const state = store.getState()
-	localStorage['redux-store'] = state
-}
+const saveState = () => 
+    localStorage["redux-store"] = JSON.stringify(store.getState())
 
-let store = storeFactory(initalState)
+const handleError = (error) =>
+	store.dispatch(addError(error.message))
 
-store.dispatch(suggestResortNames('abe'))
+const store = storeFactory(initialState)
+store.subscribe(saveState)
+
+window.React = React
+window.store = store
+window.addEventListener("error", handleError)
+
+render(
+	<Provider store={store}>
+	   {routes}
+	</Provider>,
+  document.getElementById('react-container')
+)
